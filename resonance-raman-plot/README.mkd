@@ -1,0 +1,2 @@
+# Resonance Raman Plot
+This is a handy script designed to make the generation of a very specific kind of graphics easier.
