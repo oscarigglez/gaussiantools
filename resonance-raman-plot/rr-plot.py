@@ -83,7 +83,7 @@ class Unfolded:
                 ax = axs[i]
             for j in range(len(self.specList)):
                 spec = self.specList[j]
-                multi = self.maxY/np.amax(spec.Y)#*5.0/7.0
+                multi = self.maxY/np.amax(spec.Y)*5.0#/7.0
                 Ymod = j*self.maxY
                 ax.plot(spec.X, np.multiply(spec.Y, multi) + Ymod, label=spec.inwave, color=self.palette[j])
                 #axs[-1].text(0.96*self.waverangeList[-1][1], self.Ypadding + Ymod, str(spec.inwave) + " nm ", color=self.palette[j])
