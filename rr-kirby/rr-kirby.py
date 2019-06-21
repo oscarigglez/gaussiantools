@@ -8,7 +8,7 @@ import pandas as pd
 
 class System:
     def __init__(self, *args, **kwargs):
-        self.name = kwargs.get('name', None)
+        self.name = kwargs.get('name', "system")
         self.ints = {}
         print("System instantiated!\n")
 
@@ -121,10 +121,11 @@ class System:
         df.set_index('mode', inplace=True)
         print(df.head())
         print(df.info())
+        df.to_csv("{}.csv".format(self.name))
 
 
 # Execution and testing
-
+"""
 sys = System(name="PN")
 sys.get_wn("pn-system/rr_466nm.log")
 sys.load_raman("pn-system/sl.log")
@@ -133,3 +134,4 @@ sys.load_rr("pn-system/rr_569nm.log")
 sys.load_rr("pn-system/rr_581nm.log")
 sys.load_intmodes("pn-system/intmodes.log", list(range(1, 27)))
 sys.make_df()
+"""
