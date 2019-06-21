@@ -26,6 +26,21 @@ class System:
                 pass
 
 
+    """
+    def load_optfreq(self, filename):
+        with open(filename, 'r') as openfile:
+            lines = openfile.readlines()
+
+        self.ints['SL'] = []
+        for i in range(len(lines)):
+            line = lines[i]
+            if "Raman Activ --" in line:
+                self.ints['SL'] += line.split()[3:]
+            else:
+                pass
+    """
+
+
     def load_raman(self, filename):
         with open(filename, 'r') as openfile:
             lines = openfile.readlines()
