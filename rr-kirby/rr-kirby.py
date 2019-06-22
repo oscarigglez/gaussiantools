@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 
 
-
 class System:
     def __init__(self, *args, **kwargs):
         self.name = kwargs.get('name', "system")
@@ -119,6 +118,12 @@ class System:
                         pd.DataFrame(data=self.ints)],
                        axis=1)
         df.set_index('mode', inplace=True)
+        try:
+            nm_cols = [col for col in df.columns if "nm" in col]
+            for col in nm_cols:
+                df['{} ef'.format(col)] = np.log10(df[col]/df['SL'])
+        except:
+            pass
         print(df.head())
         print(df.info())
         df.to_csv("{}.csv".format(self.name))
