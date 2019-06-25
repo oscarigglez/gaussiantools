@@ -20,7 +20,7 @@ class System:
         for i in range(len(lines)):
             line = lines[i]
             if "Frequencies --" in line:
-                self.wn += line.split()[2:]
+                self.wn += [float(x) for x in line.split()[2:]]
             else:
                 pass
 
@@ -48,7 +48,7 @@ class System:
         for i in range(len(lines)):
             line = lines[i]
             if "Raman Activ --" in line:
-                self.ints['SL'] += line.split()[3:]
+                self.ints['SL'] += [float(x) for x in line.split()[3:]]
             else:
                 pass
 
@@ -61,7 +61,7 @@ class System:
         for i in range(len(lines)):
             line = lines[i]
             if "RamAct Fr= 1--" in line:
-                tmp += line.split("--")[1].split()
+                tmp += [float(x) for x in line.split("--")[1].split()]
             elif "Using perturbation frequencies:" in line:
                 in_wl = round(45.56335/float(line.split(':')[1]))
             else:
@@ -120,6 +120,7 @@ class System:
         df.set_index('mode', inplace=True)
         try:
             nm_cols = [col for col in df.columns if "nm" in col]
+            print(nm_cols)
             for col in nm_cols:
                 df['{} ef'.format(col)] = np.log10(df[col]/df['SL'])
         except:
