@@ -141,3 +141,20 @@ sys.load_rr("pn-system/rr_581nm.log")
 sys.load_intmodes("pn-system/intmodes.log", list(range(1, 27)))
 sys.make_df()
 """
+
+name = input("Enter a name for your system: ")
+wn = input("Enter the path of the wn file: ")
+intmodes = input("Enter the path of the intmodes file: ")
+mol_atom_number = int(input("How many atoms belong to the molecule?: "))
+sl = input("Enter the path of the SL file: ")
+rr_basename = input("Enter the base name of your rr files as 'whatever-system-{}nm.out': ")
+rr_range = input("Enter the starting, ending and step values for your laser as '300 500 3': ").split()
+rr_range = [int(num) for num in rr_range]
+
+sys = System(name=name)
+sys.get_wn(wn)
+sys.load_intmodes(intmodes, list(range(1, mol_atom_number + 1)))
+sys.load_raman(sl)
+for wl in np.arange(rr_range[0], rr_range[1], rr_range[2]):
+    sys.load_rr(rr_basename.format(wl))
+sys.make_df()
