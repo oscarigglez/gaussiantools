@@ -19,19 +19,52 @@ def angle_between(u, v):
 
 def cos_between(u, v):
     """
-    Returns the angle in radians between vectors u and v
+    Returns the cosine between vectors u and v
     """
     u_u = unit_vector(u)
     v_u = unit_vector(v)
     return np.clip(np.dot(u_u, v_u), -1, 1)
 
-def find_normal(a, b, c):
+def find_normal_from_points(a, b, c):
     """
     Finds the normal unit vector to a plane defined by a set of three points
     """
     dir = np.cross((b - a), (c - a))
     normal = unit_vector(dir)
     return normal
+
+def find_normal_from_vectors(u, v):
+    """
+    Finds the normal unit vector to a plane defined by a set of two vectors
+    """
+    dir = np.cross(u, v)
+    normal = unit_vector(dir)
+    return normal
+
+def rotation_matrix(angle, direction, point=None):
+    sin = np.sin(angle)
+    cos = np.cos(angle)
+    direction = unit_vector(direction[:3])
+    R = np.diag([cos, cos, cos])
+    R += np.outer(direction, direction) * (1.0 - cos)
+    direction *= sin
+    R += np.array([[ 0.0,         -direction[2],  direction[1]],
+                   [ direction[2], 0.0,          -direction[0]],
+                   [-direction[1], direction[0],  0.0]])
+    M = np.identity(4)
+    M[:3, :3] = R
+    if point is not None:
+        # rotation not around origin
+        point = np.array(point[:3], dtype=np.float64, copy=False)
+        M[:3, 3] = point - np.dot(R, point)
+    return M
+
+def apply_4x4_matrix_to_3D_set(matrix, coords):
+    if coords.shape[1] == 3:
+        coords = np.hstack((coords, np.ones((coords.shape[0], 1))))
+    else:
+        pass
+    return matrix.dot(coords.T).T[:,:3]
 
 def calc_rot_matrix(current_axis, desired_axis, points=None):
     rot_axis = np.cross(current_axis, desired_axis)
@@ -75,17 +108,24 @@ class Structure:
             a = self.coords[comb[0],:]
             b = self.coords[comb[1],:]
             c = self.coords[comb[2],:]
-            norm = find_normal(a, b, c)
+            norm = find_normal_from_points(a, b, c)
             norm_list.append(norm)
         norm_array = np.array(norm_list)
         norm_mean = np.mean(norm_array, axis=0)
         self.main_axis = unit_vector(norm_mean)
 
-    def rotate_to_z(self):
-        z = np.array([0, 0, 1])
-        rot_matrix = calc_rot_matrix(self.main_axis, z)
-        self.coords = rot_matrix.dot(self.coords.T).T
+    def update_geometry(self):
+        self.find_center()
         self.find_axis()
+
+    def rotate_to_z(self):
+        self.update_geometry()
+        z = np.array([0, 0, 1])
+        angle = angle_between(self.main_axis, z)
+        direction = find_normal_from_vectors(self.main_axis, z)
+        M = rotation_matrix(angle, direction, point=self.center)
+        self.coords = apply_4x4_matrix_to_3D_set(M, self.coords)
+        self.update_geometry()
 
 def read_xyz(xyz):
     with open(xyz, 'r') as open_xyz:
