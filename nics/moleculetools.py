@@ -95,10 +95,11 @@ class Structure:
         self.center = np.array([x, y, z])
 
     def translate_to_center(self):
+        self.update_geometry()
         trans_matrix = np.matmul(np.ones((self.natoms, 1)),
                                  np.reshape(self.center, (1, 3)))
         self.coords = self.coords - trans_matrix
-        self.find_center()
+        self.update_geometry()
 
     def find_axis(self, print_info=False):
         combs = combinations(self.atomlist, 3)
