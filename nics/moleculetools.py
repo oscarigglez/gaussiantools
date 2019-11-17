@@ -79,13 +79,33 @@ def calc_rot_matrix(current_axis, desired_axis, points=None):
     R = np.identity(3) + as_w*sin + np.square(as_w)*(1 - cos)
     return R
 
+def find_center(coords):
+    x = coords[:,0].mean()
+    y = coords[:,1].mean()
+    z = coords[:,2].mean()
+    return np.array([x, y, z])
+
+def find_axis(coords):
+    indices = list(range(coords.shape[0]))
+    combs = combinations(indices, 3)
+    unique_combs = list(set(combs))
+    norm_list = []
+    for comb in unique_combs:
+        a = coords[comb[0],:]
+        b = coords[comb[1],:]
+        c = coords[comb[2],:]
+        norm = find_normal_from_points(a, b, c)
+        norm_list.append(norm)
+    norm_array = np.array(norm_list)
+    norm_mean = np.mean(norm_array, axis=0)
+    return unit_vector(norm_mean)
+
 class Structure:
     def __init__(self, atoms, coords, **kwargs):
         self.name = kwargs.get('name', "system")
         self.atoms = atoms
         self.coords = coords
         self.natoms = len(self.atoms)
-        self.atomlist = list(range(self.natoms))
         print("Molecule instantiated!\n")
 
     def find_center(self):
@@ -101,8 +121,10 @@ class Structure:
         self.coords = self.coords - trans_matrix
         self.update_geometry()
 
-    def find_axis(self, print_info=False):
-        combs = combinations(self.atomlist, 3)
+    def find_axis(self, atoms=None, print_info=False):
+        if atoms is None:
+            atoms = list(range(self.natoms))
+        combs = combinations(atoms, 3)
         unique_combs = list(set(combs))
         norm_list = []
         for comb in unique_combs:
@@ -137,3 +159,30 @@ def read_xyz(xyz):
         atom_list.append(line.split()[0])
         xyz_list.append([float(coord) for coord in line.split()[1:]])
     return (atom_list, np.asarray(xyz_list))
+
+def read_log(log):
+    with open(log, 'r') as open_log:
+        log_lines = open_log.readlines()[2:]
+    atom_list = []
+    xyz_list = []
+    getting_coords = False
+    for i, line in enumerate(log_lines):
+        if "Charge = " in line:
+            getting_coords = True
+        elif getting_coords:
+            if len(line.strip()) == 0:
+                break
+            atom_list.append(line.split()[0])
+            xyz_list.append([float(coord) for coord in line.split()[1:]])
+    return (atom_list, np.asarray(xyz_list))
+
+def get_isodata(log):
+    with open(log, "r") as open_log:
+        log_lines = open_log.readlines()
+    isodata = -np.array([float(line.split()[4])
+                         for line in log_lines
+                         if "Bq   Isotropic" in line])
+    #for i, item in enumerate(isodata):
+    #    if abs(item) > 2000:
+    #        isodata[i] = item/abs(item)
+    return isodata
