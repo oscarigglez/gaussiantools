@@ -132,7 +132,7 @@ class Structure:
             b = self.coords[comb[1],:]
             c = self.coords[comb[2],:]
             norm = find_normal_from_points(a, b, c)
-            norm_list.append(norm)
+            norm_list.append(abs(unit_vector(norm)))
         norm_array = np.array(norm_list)
         norm_mean = np.mean(norm_array, axis=0)
         self.main_axis = unit_vector(norm_mean)
