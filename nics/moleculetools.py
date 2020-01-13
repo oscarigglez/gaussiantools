@@ -1,5 +1,4 @@
 import numpy as np
-from itertools import combinations
 
 element_dict = {}
 
@@ -66,18 +65,18 @@ def apply_4x4_matrix_to_3D_set(matrix, coords):
         pass
     return matrix.dot(coords.T).T[:,:3]
 
-def calc_rot_matrix(current_axis, desired_axis, points=None):
-    rot_axis = np.cross(current_axis, desired_axis)
-    w = unit_vector(rot_axis)
-    wx, wy, wz = w
-    as_w = np.array([[  0, -wz,  wy],
-                     [ wz,   0, -wx],
-                     [-wy,  wx,   0]])
-    ang = angle_between(current_axis, desired_axis)
-    cos = cos_between(current_axis, desired_axis)
-    sin = np.sqrt(1 - cos**2)
-    R = np.identity(3) + as_w*sin + np.square(as_w)*(1 - cos)
-    return R
+#def calc_rot_matrix(current_axis, desired_axis, points=None):
+#    rot_axis = np.cross(current_axis, desired_axis)
+#    w = unit_vector(rot_axis)
+#    wx, wy, wz = w
+#    as_w = np.array([[  0, -wz,  wy],
+#                     [ wz,   0, -wx],
+#                     [-wy,  wx,   0]])
+#    ang = angle_between(current_axis, desired_axis)
+#    cos = cos_between(current_axis, desired_axis)
+#    sin = np.sqrt(1 - cos**2)
+#    R = np.identity(3) + as_w*sin + np.square(as_w)*(1 - cos)
+#    return R
 
 def find_center(coords):
     x = coords[:,0].mean()
@@ -113,7 +112,6 @@ class Structure:
         self.atoms = atoms
         self.coords = coords
         self.natoms = len(self.atoms)
-        print("Molecule instantiated!\n")
 
     def find_center(self):
         x = self.coords[:,0].mean()
@@ -127,6 +125,24 @@ class Structure:
                                  np.reshape(self.center, (1, 3)))
         self.coords = self.coords - trans_matrix
         self.update_geometry()
+
+    def find_radius(self):
+        distances = np.linalg.norm(self.coords - self.center, axis=1)
+        self.radius = distances.max()
+
+    def find_bonds(self):
+        MIN_BOND_LENGTH = 0.9
+        MAX_BOND_LENGTH = 2.1
+        self.bonds = []
+        for i in range(len(self.atoms)):
+            for j in range(i + 1, len(self.atoms)):
+                if i != j:
+                    d = np.linalg.norm(self.coords[i,:] - self.coords[j,:])
+                    #print("d between {} and {}: {}".format(i, j, d))
+                    if MIN_BOND_LENGTH <= d <= MAX_BOND_LENGTH:
+                        self.bonds.append({'atoms': (i, j),
+                                           'elements': (self.atoms[i], self.atoms[j]),
+                                           'distance': d})
 
     #def find_axis(self, atoms=None, print_info=False):
     #    if atoms is None:
@@ -143,7 +159,7 @@ class Structure:
     #    norm_array = np.array(norm_list)
     #    norm_mean = np.mean(norm_array, axis=0)
     #    self.main_axis = unit_vector(norm_mean)
-    
+
     def find_axis(self):
         self.main_axis = best_fitted_plane(self.coords)
 
@@ -160,6 +176,14 @@ class Structure:
         self.coords = apply_4x4_matrix_to_3D_set(M, self.coords)
         self.update_geometry()
 
+    def rotate_along_z(self, angle):
+        self.update_geometry()
+        z = np.array([0, 0, 1])
+        M = rotation_matrix(angle, z, point=self.center)
+        self.coords = apply_4x4_matrix_to_3D_set(M, self.coords)
+        self.update_geometry()
+
+
 def read_xyz(xyz):
     with open(xyz, 'r') as open_xyz:
         xyz_lines = open_xyz.readlines()[2:]
@@ -169,30 +193,3 @@ def read_xyz(xyz):
         atom_list.append(line.split()[0])
         xyz_list.append([float(coord) for coord in line.split()[1:]])
     return (atom_list, np.asarray(xyz_list))
-
-def read_log(log):
-    with open(log, 'r') as open_log:
-        log_lines = open_log.readlines()[2:]
-    atom_list = []
-    xyz_list = []
-    getting_coords = False
-    for i, line in enumerate(log_lines):
-        if "Charge = " in line:
-            getting_coords = True
-        elif getting_coords:
-            if len(line.strip()) == 0:
-                break
-            atom_list.append(line.split()[0])
-            xyz_list.append([float(coord) for coord in line.split()[1:]])
-    return (atom_list, np.asarray(xyz_list))
-
-def get_isodata(log):
-    with open(log, "r") as open_log:
-        log_lines = open_log.readlines()
-    isodata = -np.array([float(line.split()[4])
-                         for line in log_lines
-                         if "Bq   Isotropic" in line])
-    #for i, item in enumerate(isodata):
-    #    if abs(item) > 2000:
-    #        isodata[i] = item/abs(item)
-    return isodata
