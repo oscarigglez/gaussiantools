@@ -197,6 +197,10 @@ class ReadSurfaceStructure(mt.Structure):
         self.radius = distances.max()
 
     def save_3d(self, numbering=False, interactive=False):
+        """
+        Saves the plot of the NICS values over the atoms of the molecule as
+        a 3D graph
+        """
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(self.atom_coords[:,0],
@@ -237,6 +241,10 @@ class ReadSurfaceStructure(mt.Structure):
         plt.close()
 
     def save_2d(self, numbering=False):
+        """
+        Saves the plot of the NICS values over the atoms of the molecule as
+        a 2D graph where the molecule is flattened along its main axis (z)
+        """
         fig = plt.figure()
         ax = fig.add_subplot(111)
         if numbering:
@@ -288,6 +296,9 @@ class ReadSurfaceStructure(mt.Structure):
 
 
 def parse_atom_list(atom_list_str=None):
+    """
+    Interprets custom atom list strings and returns true lists of integers
+    """
     if atom_list_str == None:
         return None
     atom_ranges = atom_list_str.split(",")
@@ -320,21 +331,11 @@ def read_log(log):
             xyz_list.append([float(coord) for coord in line.split()[1:]])
     return (atom_list, np.asarray(xyz_list))
 
-def get_isodata(log):
-    """
-    Reads the values of the NICS at each dummy atom in a log file
-    """
-    with open(log, "r") as open_log:
-        log_lines = open_log.readlines()
-    isodata = -np.array([float(line.split()[4])
-                         for line in log_lines
-                         if "Bq   Isotropic" in line])
-    #for i, item in enumerate(isodata):
-    #    if abs(item) > 2000:
-    #        isodata[i] = item/abs(item)
-    return isodata
-
 def make_grid(radius=5, density=50):
+    """
+    Helper function to create grids given a 'radius' (half-side of a square)
+    and a density (points per side), returns a 2D numpy array
+    """
     spacing = np.linspace(-radius, radius, density)
     X2 = np.meshgrid(spacing, spacing)
     grid_shape = X2[0].shape
