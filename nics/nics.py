@@ -375,7 +375,7 @@ def surface(xyz_file, atom_list, radius, density):
     system.rotate_to_z()
     system.update_geometry()
     system.find_bonds()
-    system.rotate_along_z(0.4)
+    system.rotate_along_z(0)
     system.update_geometry()
     system.make_surface(radius=radius, density=density, distance=1)
     system.save(interactive=True)
@@ -412,16 +412,17 @@ def test(xyz_file):
     system.rotate_to_z()
     system.update_geometry()
     system.find_bonds()
-    #angle = 6.28/100
-    #for num in range(1, 101):
-    #    system.rotate_along_z(angle)
-    #    system.update_geometry()
-    #    system.make_surface()
-    #    system.save(filename=str(num))
-    system.rotate_along_z(0.8)
-    system.update_geometry()
-    system.make_surface()
-    system.save()
+
+    angle = 6.28/100
+    for num in range(1, 101):
+        system.rotate_along_z(angle)
+        system.update_geometry()
+        system.make_surface()
+        system.save(filename="-{}{}".format("0"*(4 - len(str(num))), num))
+    #system.rotate_along_z(0.8)
+    #system.update_geometry()
+    #system.make_surface()
+    #system.save()
 
 if __name__ == "__main__":
     main()
