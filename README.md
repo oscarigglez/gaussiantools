@@ -2,5 +2,4 @@
 
 A collection of Python scripts to help me perform calculations and process data obtained using the computational chemistry suite Gaussian.
 
-gaussiantools.py will be a Python module containing useful functions and classes.
-The subdirectories will contain interesting scripts that aren't appropriate for a module or pieces of code that are but I haven't implemented yet.
+Currently the most complete and interesting of these projects lives under the ```nics``` directory, which is a complete application designed to perform NICS calculation on molecules that have curved rings. It also contains a useful module called moleculetools.py, which holds a variety of general functions that are useful for general work in chemical modelling.
