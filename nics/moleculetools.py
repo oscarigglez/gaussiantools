@@ -138,27 +138,10 @@ class Structure:
             for j in range(i + 1, len(self.atoms)):
                 if i != j:
                     d = np.linalg.norm(self.coords[i,:] - self.coords[j,:])
-                    #print("d between {} and {}: {}".format(i, j, d))
                     if MIN_BOND_LENGTH <= d <= MAX_BOND_LENGTH:
                         self.bonds.append({'atoms': (i, j),
                                            'elements': (self.atoms[i], self.atoms[j]),
                                            'distance': d})
-
-    #def find_axis(self, atoms=None, print_info=False):
-    #    if atoms is None:
-    #        atoms = list(range(self.natoms))
-    #    combs = combinations(atoms, 3)
-    #    unique_combs = list(set(combs))
-    #    norm_list = []
-    #    for comb in unique_combs:
-    #        a = self.coords[comb[0],:]
-    #        b = self.coords[comb[1],:]
-    #        c = self.coords[comb[2],:]
-    #        norm = find_normal_from_points(a, b, c)
-    #        norm_list.append(abs(unit_vector(norm)))
-    #    norm_array = np.array(norm_list)
-    #    norm_mean = np.mean(norm_array, axis=0)
-    #    self.main_axis = unit_vector(norm_mean)
 
     def find_axis(self):
         self.main_axis = best_fitted_plane(self.coords)
@@ -193,3 +176,19 @@ def read_xyz(xyz):
         atom_list.append(line.split()[0])
         xyz_list.append([float(coord) for coord in line.split()[1:]])
     return (atom_list, np.asarray(xyz_list))
+
+    #def find_axis(self, atoms=None, print_info=False):
+    #    if atoms is None:
+    #        atoms = list(range(self.natoms))
+    #    combs = combinations(atoms, 3)
+    #    unique_combs = list(set(combs))
+    #    norm_list = []
+    #    for comb in unique_combs:
+    #        a = self.coords[comb[0],:]
+    #        b = self.coords[comb[1],:]
+    #        c = self.coords[comb[2],:]
+    #        norm = find_normal_from_points(a, b, c)
+    #        norm_list.append(abs(unit_vector(norm)))
+    #    norm_array = np.array(norm_list)
+    #    norm_mean = np.mean(norm_array, axis=0)
+    #    self.main_axis = unit_vector(norm_mean)
